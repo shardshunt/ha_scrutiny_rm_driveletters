@@ -448,23 +448,18 @@ class ScrutinySmartAttributeSensor(
         )
 
         # Create a unique ID for this sensor entity.
-        # Slugify the name part to ensure it's URL-friendly and consistent.
+        # Use model name instead of drive letter/path.
         summary_device_data = coordinator.data.get(wwn, {}).get(KEY_SUMMARY_DEVICE, {})
-        device_name_raw = summary_device_data.get(ATTR_DEVICE_NAME)
-        if not device_name_raw:
-            device_name_cleaned_for_id = f"disk_{wwn[-6:]}"
-        else:
-            device_name_cleaned_for_id = device_name_raw.split("/")[-1]
-        device_name_slug_for_id = slugify(device_name_cleaned_for_id)
-
-        # Verwende den ursprünglichen, eindeutigen
-        # _attribute_id_str und den slugifizierten Anzeigenamen
+        model_name_raw = summary_device_data.get(ATTR_MODEL_NAME, f"disk_{wwn[-6:]}")
+        model_name_slug_for_id = slugify(model_name_raw)
+        
+        # Slugify the SMART attribute’s display name for readability
         slugified_display_name_for_id = slugify(
             self.attribute_name_for_entity_description
         )
-
+        
         self._attr_unique_id = (
-            f"{DOMAIN}_{self._wwn}_{device_name_slug_for_id}_smart_"
+            f"{DOMAIN}_{self._wwn}_{model_name_slug_for_id}_smart_"
             f"{slugify(self._attribute_id_str)}_{slugified_display_name_for_id}"
         )
 
