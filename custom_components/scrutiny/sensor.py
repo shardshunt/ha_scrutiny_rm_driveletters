@@ -175,12 +175,10 @@ async def async_setup_entry(
 
         # Create DeviceInfo for this disk. All sensors related
         #  to this disk will be associated with this device.
-        device_info_name = (
-            # Use model name or "Disk"
-            f"{summary_device_data.get(ATTR_MODEL_NAME, 'Disk')} "
-            # Use device name or last 6 chars of WWN
-            f"({summary_device_data.get(ATTR_DEVICE_NAME, wwn[-6:])})"
+        device_info_name = summary_device_data.get(
+            ATTR_MODEL_NAME, f"Disk {wwn[-6:]}"
         )
+
         device_info = DeviceInfo(
             identifiers={(DOMAIN, wwn)},  # Unique identifier for this device (WWN)
             name=device_info_name,
@@ -450,10 +448,11 @@ class ScrutinySmartAttributeSensor(
         # Create a unique ID for this sensor entity.
         # Use model name instead of drive letter/path.
         summary_device_data = coordinator.data.get(wwn, {}).get(KEY_SUMMARY_DEVICE, {})
-        model_name_raw = summary_device_data.get(ATTR_MODEL_NAME, f"disk_{wwn[-6:]}")
+        model_name_raw = summary_device_data.get(ATTR_MODEL_NAME)
+        if not model_name_raw:
+            model_name_raw = f"disk_{wwn[-6:]}"
         model_name_slug_for_id = slugify(model_name_raw)
         
-        # Slugify the SMART attribute’s display name for readability
         slugified_display_name_for_id = slugify(
             self.attribute_name_for_entity_description
         )
